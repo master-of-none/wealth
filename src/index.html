@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WealthPulse</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0e17;
+      --surface: #141c2e;
+      --surface2: #111827;
+      --gold: #d4af37;
+      --gold-dark: #c5a028;
+      --text: #e8e6e1;
+      --text-muted: #8a9bb5;
+      --text-dim: #6b7a91;
+      --border: rgba(212, 175, 55, 0.15);
+      --green: #22c55e;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ========== HEADER ========== */
+    .header {
+      background: linear-gradient(135deg, #0f1521, #141c2e);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      flex-shrink: 0;
+      -webkit-app-region: drag;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+    .tab-bar {
+      display: flex;
+      gap: 2px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      padding: 3px;
+      -webkit-app-region: no-drag;
+    }
+    .tab {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-muted);
+      background: transparent;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+    .tab.active {
+      font-weight: 600;
+      color: var(--bg);
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    }
+    .tab:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.05); }
+    .header-actions {
+      display: flex; gap: 8px; align-items: center;
+      -webkit-app-region: no-drag;
+    }
+
+    /* ========== BUTTONS ========== */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      color: var(--bg);
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-ghost {
+      color: var(--gold);
+      background: transparent;
+      border: 1px solid rgba(212,175,55,0.3);
+    }
+    .btn-ghost:hover { background: rgba(212,175,55,0.08); }
+    .btn-danger { color: var(--red); background: rgba(239,68,68,0.1); }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn-icon { padding: 6px; background: none; border: none; cursor: pointer; color: var(--text-muted); }
+    .btn-icon:hover { color: var(--gold); }
+
+    /* ========== MAIN ========== */
+    .main {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .main::-webkit-scrollbar { width: 6px; }
+    .main::-webkit-scrollbar-track { background: transparent; }
+    .main::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 3px; }
+
+    /* ========== CARDS ========== */
+    .card {
+      background: linear-gradient(145deg, var(--surface), var(--surface2));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gold);
+      font-family: 'Playfair Display', Georgia, serif;
+      letter-spacing: 0.3px;
+    }
+
+    /* ========== METRICS ========== */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .metric-card {
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .metric-card.gold { background: linear-gradient(145deg, rgba(212,175,55,0.08), rgba(212,175,55,0.03)); border: 1px solid rgba(212,175,55,0.2); }
+    .metric-card.blue { background: linear-gradient(145deg, rgba(59,130,246,0.08), rgba(59,130,246,0.03)); border: 1px solid rgba(59,130,246,0.2); }
+    .metric-card.green { background: linear-gradient(145deg, rgba(34,197,94,0.08), rgba(34,197,94,0.03)); border: 1px solid rgba(34,197,94,0.2); }
+    .metric-card.amber { background: linear-gradient(145deg, rgba(245,158,11,0.08), rgba(245,158,11,0.03)); border: 1px solid rgba(245,158,11,0.2); }
+    .metric-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: 'DM Sans', monospace;
+    }
+    .metric-sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+    /* ========== TABLE ========== */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+    th {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    td {
+      padding: 12px 14px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+    tr:hover td { background: rgba(255,255,255,0.04); }
+    .mono { font-family: 'DM Sans', monospace; }
+    .bold { font-weight: 600; }
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-gold { color: var(--gold); }
+    .text-muted { color: var(--text-dim); }
+    .text-sm { font-size: 11px; }
+
+    /* ========== BADGES ========== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+    .badge-amber { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+    .badge-red { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .badge-purple { background: rgba(139,92,246,0.1); color: var(--purple); border: 1px solid rgba(139,92,246,0.2); }
+
+    /* ========== ALERTS ========== */
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .alert-critical { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); }
+    .alert-warning { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); }
+    .alert-info { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); }
+    .alert-title { font-size: 13px; font-weight: 600; }
+    .alert-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ========== FORMS ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-content {
+      background: linear-gradient(145deg, var(--surface), #0f1521);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    .form-input, .form-select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(212,175,55,0.2);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--gold); }
+    .form-select { background: #0f1521; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; }
+    .checkbox-row input { accent-color: var(--gold); width: 16px; height: 16px; }
+    .form-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+    /* ========== NOTIF PANEL ========== */
+    .notif-panel {
+      position: fixed;
+      top: 60px;
+      right: 16px;
+      width: 380px;
+      background: linear-gradient(145deg, var(--surface), #0f1521);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 14px;
+      padding: 18px;
+      z-index: 999;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .notif-panel.hidden { display: none; }
+    .notif-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ========== MISC ========== */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-dim);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .sip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .sip-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .sip-day {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .summary-bar {
+      display: flex;
+      gap: 20px;
+      padding: 14px 16px;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .summary-bar span { color: var(--text-dim); }
+    .summary-bar strong { color: var(--text); }
+
+    /* ========== PIE ========== */
+    .pie-wrap {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+    }
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .pie-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .pie-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .page-header { margin-bottom: 20px; }
+    .page-header h2 { font-size: 20px; margin: 0; font-family: 'Playfair Display', serif; color: var(--gold); }
+    .page-header p { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+    .row-actions { display: flex; gap: 6px; }
+
+    /* ========== UPDATE BANNER ========== */
+    .update-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    .update-banner.hidden { display: none; }
+    .update-banner.checking { background: rgba(59,130,246,0.1); color: var(--blue); border-bottom: 1px solid rgba(59,130,246,0.15); }
+    .update-banner.downloading { background: rgba(245,158,11,0.1); color: var(--amber); border-bottom: 1px solid rgba(245,158,11,0.15); }
+    .update-banner.ready { background: rgba(34,197,94,0.12); color: var(--green); border-bottom: 1px solid rgba(34,197,94,0.2); }
+    .update-banner.error { background: rgba(239,68,68,0.08); color: var(--red); border-bottom: 1px solid rgba(239,68,68,0.15); }
+    .update-banner .update-msg { flex: 1; }
+    .update-banner .update-progress {
+      width: 120px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.1); overflow: hidden;
+    }
+    .update-banner .update-progress-fill {
+      height: 100%; border-radius: 2px;
+      background: var(--amber); transition: width 0.3s ease;
+    }
+    .update-banner .btn-update {
+      padding: 5px 14px; border-radius: 6px; border: none; cursor: pointer;
+      font-size: 12px; font-weight: 600; font-family: inherit;
+      background: var(--green); color: var(--bg);
+    }
+    .update-banner .btn-dismiss {
+      padding: 4px; background: none; border: none; cursor: pointer;
+      color: inherit; opacity: 0.6;
+    }
+    .update-banner .btn-dismiss:hover { opacity: 1; }
+    .version-tag {
+      font-size: 11px; color: var(--text-dim); opacity: 0.7;
+      padding: 2px 8px; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px; margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 4h10M7 8h10M7 4c0 4 3 8 10 8M7 8c0 6 4 8 7 12"/></svg>
+        WealthPulse
+        <span class="version-tag" id="versionTag">v1.0.0</span>
+      </div>
+      <nav class="tab-bar" id="tabBar"></nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" id="bellBtn" style="position:relative;">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-badge hidden" id="bellBadge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Update Banner -->
+    <div class="update-banner hidden" id="updateBanner">
+      <span class="update-msg" id="updateMsg"></span>
+      <div class="update-progress hidden" id="updateProgress"><div class="update-progress-fill" id="updateProgressFill"></div></div>
+      <button class="btn-update hidden" id="updateInstallBtn" onclick="installUpdate()">Restart & Update</button>
+      <button class="btn-dismiss" id="updateDismissBtn" onclick="dismissUpdate()">✕</button>
+    </div>
+
+    <!-- Notification Panel -->
+    <div class="notif-panel hidden" id="notifPanel"></div>
+
+    <!-- Main Content -->
+    <main class="main" id="mainContent"></main>
+
+    <!-- Modal -->
+    <div class="modal-overlay hidden" id="modal">
+      <div class="modal-content" id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // ================ STATE ================
+    const STORAGE_KEY = "finance-data";
+    const TABS = ["Dashboard", "Fixed Deposits", "Mutual Funds", "Stocks"];
+    let state = { fds: [], mutualFunds: [], stocks: [] };
+    let activeTab = 0;
+    let editingItem = null;
+
+    // ================ STORAGE ================
+    async function loadData() {
+      try {
+        if (window.electronAPI) {
+          const d = await window.electronAPI.storeGet(STORAGE_KEY);
+          if (d) state = d;
+        } else {
+          const d = localStorage.getItem(STORAGE_KEY);
+          if (d) state = JSON.parse(d);
+        }
+      } catch (e) { console.error("Load failed:", e); }
+    }
+
+    async function saveData() {
+      try {
+        if (window.electronAPI) {
+          await window.electronAPI.storeSet(STORAGE_KEY, state);
+        } else {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+      } catch (e) { console.error("Save failed:", e); }
+    }
+
+    // ================ UTILS ================
+    const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+    function fmt(amount) {
+      return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount);
+    }
+
+    function fmtDate(d) {
+      if (!d) return "—";
+      return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    function daysUntil(dateStr) {
+      if (!dateStr) return Infinity;
+      const now = new Date(); now.setHours(0,0,0,0);
+      const t = new Date(dateStr); t.setHours(0,0,0,0);
+      return Math.ceil((t - now) / 864e5);
+    }
+
+    function getNextSIP(day) {
+      const now = new Date();
+      let n = new Date(now.getFullYear(), now.getMonth(), day);
+      if (n <= now) n = new Date(now.getFullYear(), now.getMonth()+1, day);
+      return n.toISOString().split("T")[0];
+    }
+
+    function daysToSIP(day) { return daysUntil(getNextSIP(day)); }
+
+    function ordinal(n) {
+      const s = ["th","st","nd","rd"];
+      const v = n % 100;
+      return n + (s[(v-20)%10] || s[v] || s[0]);
+    }
+
+    // ================ ALERTS ================
+    function getAlerts() {
+      const alerts = [];
+      state.fds.forEach(fd => {
+        const d = daysUntil(fd.maturityDate);
+        if (d <= 0) alerts.push({ id: `fd-m-${fd.id}`, urgency: "critical", title: `${fd.bankName} FD Matured!`, detail: `${fmt(fd.amount)} — ${fd.autoRenew ? "Auto-renewal ON" : "Action needed"}`, days: d });
+        else if (d <= 7) alerts.push({ id: `fd-7-${fd.id}`, urgency: "critical", title: `${fd.bankName} FD in ${d}d`, detail: `${fmt(fd.amount)} matures ${fmtDate(fd.maturityDate)}`, days: d });
+        else if (d <= 30) alerts.push({ id: `fd-30-${fd.id}`, urgency: "warning", title: `${fd.bankName} FD in ${d}d`, detail: `${fmt(fd.amount)} matures ${fmtDate(fd.maturityDate)}`, days: d });
+      });
+      state.mutualFunds.forEach(mf => {
+        if (!mf.sipDay) return;
+        const d = daysToSIP(+mf.sipDay);
+        if (d <= 3) alerts.push({ id: `mf-s-${mf.id}`, urgency: d<=1?"critical":"warning", title: `${mf.fundName} SIP ${d===0?"today":`in ${d}d`}`, detail: `SIP of ${fmt(mf.sipAmount)} on the ${ordinal(+mf.sipDay)}`, days: d });
+      });
+      return alerts.sort((a,b) => a.days - b.days);
+    }
+
+    // ================ RENDER ================
+    function render() {
+      renderTabs();
+      renderBell();
+      renderMain();
+    }
+
+    function renderTabs() {
+      const bar = document.getElementById("tabBar");
+      const icons = [
+        `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`,
+        `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="12" cy="16" r="2"/></svg>`,
+        `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 20l4-8 4 4 4-10 6 14"/></svg>`,
+        `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>`,
+      ];
+      bar.innerHTML = TABS.map((t, i) =>
+        `<button class="tab ${activeTab===i?'active':''}" onclick="switchTab(${i})">${icons[i]} ${t}</button>`
+      ).join("");
+    }
+
+    function renderBell() {
+      const alerts = getAlerts();
+      const badge = document.getElementById("bellBadge");
+      if (alerts.length > 0) {
+        badge.textContent = alerts.length;
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+
+    function renderMain() {
+      const el = document.getElementById("mainContent");
+      switch (activeTab) {
+        case 0: el.innerHTML = renderDashboard(); break;
+        case 1: el.innerHTML = renderFDs(); break;
+        case 2: el.innerHTML = renderMFs(); break;
+        case 3: el.innerHTML = renderStocks(); break;
+      }
+    }
+
+    // ================ DASHBOARD ================
+    function renderDashboard() {
+      const totalFD = state.fds.reduce((s, f) => s + (+f.amount||0), 0);
+      const mfInv = state.mutualFunds.reduce((s, m) => s + (+m.totalInvested||0), 0);
+      const mfCur = state.mutualFunds.reduce((s, m) => s + (+m.currentValue||0), 0);
+      const stInv = state.stocks.reduce((s, st) => s + (+st.quantity||0) * (+st.buyPrice||0), 0);
+      const stCur = state.stocks.reduce((s, st) => s + (+st.quantity||0) * (+st.currentPrice||+st.buyPrice||0), 0);
+      const total = totalFD + mfCur + stCur;
+      const mfRet = mfInv > 0 ? ((mfCur - mfInv)/mfInv*100).toFixed(1) : "0.0";
+      const stPnl = stCur - stInv;
+      const alerts = getAlerts();
+
+      const sipCards = state.mutualFunds.filter(m=>m.sipDay).map(mf => {
+        const d = daysToSIP(+mf.sipDay);
+        return `<div class="sip-item">
+          <div class="sip-day" style="background:${d<=3?"rgba(245,158,11,0.15)":"rgba(34,197,94,0.1)"};color:${d<=3?"var(--amber)":"var(--green)"}">${mf.sipDay}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(mf.fundName)}</div>
+            <div class="text-sm text-muted">${fmt(mf.sipAmount)} — ${d===0?"Today":`in ${d} days`}</div>
+          </div>
+        </div>`;
+      }).join("");
+
+      return `
+        <div class="metric-grid">
+          <div class="metric-card gold"><div class="metric-label">Total Portfolio</div><div class="metric-value" style="color:var(--gold)">${fmt(total)}</div></div>
+          <div class="metric-card blue"><div class="metric-label">Fixed Deposits</div><div class="metric-value" style="color:var(--blue)">${fmt(totalFD)}</div><div class="metric-sub">${state.fds.length} deposit${state.fds.length!==1?"s":""}</div></div>
+          <div class="metric-card green"><div class="metric-label">Mutual Funds</div><div class="metric-value" style="color:var(--green)">${fmt(mfCur)}</div><div class="metric-sub" style="color:${+mfRet>=0?"var(--green)":"var(--red)"}">${mfRet}% returns</div></div>
+          <div class="metric-card amber"><div class="metric-label">Stocks</div><div class="metric-value" style="color:var(--amber)">${fmt(stCur)}</div><div class="metric-sub" style="color:${stPnl>=0?"var(--green)":"var(--red)"}">P&L: ${fmt(stPnl)}</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">Asset Allocation</div>
+            <div class="pie-wrap" id="pieArea">${renderPie([
+              {label:"Fixed Deposits",value:totalFD,color:"var(--gold)"},
+              {label:"Mutual Funds",value:mfCur,color:"var(--green)"},
+              {label:"Stocks",value:stCur,color:"var(--blue)"},
+            ])}</div>
+          </div>
+          <div class="card">
+            <div class="card-header" style="margin-bottom:12px"><div class="card-title">Upcoming Alerts</div><span class="badge ${alerts.length?"badge-amber":"badge-green"}">${alerts.length?alerts.length+" active":"All clear"}</span></div>
+            ${alerts.length===0?'<div class="empty-state" style="padding:24px">No upcoming alerts</div>':alerts.slice(0,5).map(a=>`<div class="alert-item alert-${a.urgency}"><div style="color:${a.urgency==="critical"?"var(--red)":"var(--amber)"}">⚠</div><div><div class="alert-title">${esc(a.title)}</div><div class="alert-detail">${esc(a.detail)}</div></div></div>`).join("")}
+          </div>
+        </div>
+        ${sipCards?`<div class="card"><div class="card-title">SIP Schedule</div><div class="sip-grid">${sipCards}</div></div>`:""}`;
+    }
+
+    function renderPie(data) {
+      const vals = data.filter(d=>d.value>0);
+      if (!vals.length) return '<div class="empty-state" style="padding:30px">No data</div>';
+      const total = vals.reduce((s,d)=>s+d.value,0);
+      const colors = ["#d4af37","#22c55e","#3b82f6"];
+      let cum = 0;
+      const r = 60, cx = 80, cy = 80;
+      let paths = "";
+      vals.forEach((d,i) => {
+        const angle = (d.value/total)*2*Math.PI;
+        const sx = cx + r*Math.cos(cum - Math.PI/2);
+        const sy = cy + r*Math.sin(cum - Math.PI/2);
+        cum += angle;
+        const ex = cx + r*Math.cos(cum - Math.PI/2);
+        const ey = cy + r*Math.sin(cum - Math.PI/2);
+        const la = angle > Math.PI ? 1 : 0;
+        const path = vals.length===1?`M ${cx} ${cy-r} A ${r} ${r} 0 1 1 ${cx-0.01} ${cy-r} Z`:`M ${cx} ${cy} L ${sx} ${sy} A ${r} ${r} 0 ${la} 1 ${ex} ${ey} Z`;
+        paths += `<path d="${path}" fill="${colors[i]}" opacity="0.85"/>`;
+      });
+      const legend = vals.map((d,i)=>`<div class="pie-legend-item"><div class="pie-dot" style="background:${colors[i]}"></div><span class="text-muted">${d.label}</span><span class="bold" style="margin-left:auto">${(d.value/total*100).toFixed(1)}%</span></div>`).join("");
+      return `<svg width="160" height="160">${paths}<circle cx="${cx}" cy="${cy}" r="35" fill="var(--surface)"/></svg><div class="pie-legend">${legend}</div>`;
+    }
+
+    // ================ FDs ================
+    function renderFDs() {
+      const rows = state.fds.map(fd => {
+        const d = daysUntil(fd.maturityDate);
+        const status = d<=0?"Matured":d<=30?"Maturing Soon":"Active";
+        const bc = d<=0?"badge-red":d<=30?"badge-amber":"badge-green";
+        return `<tr>
+          <td><div class="bold">${esc(fd.bankName)}</div>${fd.autoRenew?'<div class="text-sm text-gold" style="margin-top:2px">↻ Auto-renewal</div>':''}</td>
+          <td class="mono bold">${fmt(fd.amount)}</td>
+          <td>${fd.interestRate}%</td>
+          <td>${fmtDate(fd.startDate)}</td>
+          <td>${fmtDate(fd.maturityDate)}</td>
+          <td><span class="badge ${bc}">${status}${d>0?` (${d}d)`:""}</span></td>
+          <td><div class="row-actions"><button class="btn btn-ghost btn-sm" onclick="openEditFD('${fd.id}')">✎</button><button class="btn btn-danger btn-sm" onclick="deleteFD('${fd.id}')">✕</button></div></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card-header"><div class="page-header"><h2>Fixed Deposits</h2><p>Track deposits, interest rates, and maturity dates</p></div><button class="btn btn-primary" onclick="openAddFD()">+ Add FD</button></div>
+        ${state.fds.length===0?'<div class="empty-state"><div class="empty-icon">🏦</div><div class="bold">No Fixed Deposits yet</div><div class="text-sm" style="margin-top:4px">Add your first FD to start tracking</div></div>':`<div class="table-wrap"><table><thead><tr><th>Bank</th><th>Amount</th><th>Rate</th><th>Start</th><th>Maturity</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`}`;
+    }
+
+    // ================ MUTUAL FUNDS ================
+    function renderMFs() {
+      const rows = state.mutualFunds.map(mf => {
+        const inv = +mf.totalInvested||0, cur = +mf.currentValue||0;
+        const ret = inv>0?((cur-inv)/inv*100):0;
+        const sd = mf.sipDay?daysToSIP(+mf.sipDay):null;
+        return `<tr>
+          <td><div class="bold">${esc(mf.fundName)}</div>${mf.folioNumber?`<div class="text-sm text-muted" style="margin-top:2px">Folio: ${esc(mf.folioNumber)}</div>`:""}</td>
+          <td><span class="badge badge-purple">${esc(mf.category||"Equity")}</span></td>
+          <td class="mono">${fmt(mf.sipAmount)}</td>
+          <td>${sd!==null?`<span class="badge ${sd<=3?"badge-amber":"badge-green"}">📅 ${sd===0?"Today":`${sd}d`}</span>`:"—"}</td>
+          <td class="mono">${fmt(inv)}</td>
+          <td class="mono bold">${fmt(cur)}</td>
+          <td class="bold" style="color:${ret>=0?"var(--green)":"var(--red)"}">${ret>=0?"+":""}${ret.toFixed(1)}%</td>
+          <td><div class="row-actions"><button class="btn btn-ghost btn-sm" onclick="openEditMF('${mf.id}')">✎</button><button class="btn btn-danger btn-sm" onclick="deleteMF('${mf.id}')">✕</button></div></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card-header"><div class="page-header"><h2>Mutual Funds</h2><p>Track SIPs, returns, and fund performance</p></div><button class="btn btn-primary" onclick="openAddMF()">+ Add Fund</button></div>
+        ${state.mutualFunds.length===0?'<div class="empty-state"><div class="empty-icon">📈</div><div class="bold">No Mutual Funds yet</div><div class="text-sm" style="margin-top:4px">Add your first fund to start tracking</div></div>':`<div class="table-wrap"><table><thead><tr><th>Fund</th><th>Category</th><th>SIP</th><th>Next SIP</th><th>Invested</th><th>Current</th><th>Returns</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`}`;
+    }
+
+    // ================ STOCKS ================
+    function renderStocks() {
+      const stInv = state.stocks.reduce((s,st)=>s+(+st.quantity||0)*(+st.buyPrice||0),0);
+      const stCur = state.stocks.reduce((s,st)=>s+(+st.quantity||0)*(+st.currentPrice||+st.buyPrice||0),0);
+
+      const rows = state.stocks.map(st => {
+        const q = +st.quantity||0, bp = +st.buyPrice||0, cp = +st.currentPrice||bp;
+        const inv = q*bp, val = q*cp, pnl = val-inv;
+        const pct = inv>0?(pnl/inv*100):0;
+        return `<tr>
+          <td><div class="bold text-gold mono">${esc(st.symbol)}</div><div class="text-sm text-muted">${esc(st.companyName)}</div></td>
+          <td class="mono">${q}</td>
+          <td class="mono">${fmt(bp)}</td>
+          <td class="mono bold">${fmt(cp)}</td>
+          <td class="mono">${fmt(inv)}</td>
+          <td class="mono bold">${fmt(val)}</td>
+          <td><div class="bold mono" style="color:${pnl>=0?"var(--green)":"var(--red)"}">${pnl>=0?"+":""}${fmt(pnl)}</div><div class="text-sm" style="color:${pnl>=0?"var(--green)":"var(--red)"}">${pct>=0?"+":""}${pct.toFixed(1)}%</div></td>
+          <td><div class="row-actions"><button class="btn btn-ghost btn-sm" onclick="openEditStock('${st.id}')">✎</button><button class="btn btn-danger btn-sm" onclick="deleteStock('${st.id}')">✕</button></div></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card-header"><div class="page-header"><h2>Stocks</h2><p>Track holdings, prices, and profit/loss</p></div><button class="btn btn-primary" onclick="openAddStock()">+ Add Stock</button></div>
+        ${state.stocks.length===0?'<div class="empty-state"><div class="empty-icon">📊</div><div class="bold">No Stocks yet</div><div class="text-sm" style="margin-top:4px">Add your first holding to start tracking</div></div>':`<div class="table-wrap"><table><thead><tr><th>Stock</th><th>Qty</th><th>Buy Price</th><th>Current</th><th>Invested</th><th>Value</th><th>P&L</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="summary-bar">
+          <span>Total Invested: <strong>${fmt(stInv)}</strong></span>
+          <span>Current Value: <strong>${fmt(stCur)}</strong></span>
+          <span>Total P&L: <strong style="color:${stCur>=stInv?"var(--green)":"var(--red)"}">${stCur>=stInv?"+":""}${fmt(stCur-stInv)}</strong></span>
+        </div>`}`;
+    }
+
+    // ================ MODALS ================
+    function esc(s) { const d = document.createElement("div"); d.textContent = s||""; return d.innerHTML; }
+
+    function openModal(title, body) {
+      document.getElementById("modalContent").innerHTML = `<div class="modal-header"><div class="card-title" style="font-size:18px">${title}</div><button class="btn-icon" onclick="closeModal()">✕</button></div>${body}`;
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("modal").classList.add("hidden");
+      editingItem = null;
+    }
+
+    document.getElementById("modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+
+    // FD Modal
+    function fdFormHTML(fd) {
+      return `<div class="form-grid">
+        <div class="form-group"><label class="form-label">Bank Name</label><input class="form-input" id="f_bankName" value="${esc(fd?.bankName||"")}" placeholder="e.g. SBI, HDFC"/></div>
+        <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-input" id="f_amount" type="number" value="${fd?.amount||""}" placeholder="100000"/></div>
+        <div class="form-group"><label class="form-label">Interest Rate (%)</label><input class="form-input" id="f_interestRate" type="number" step="0.01" value="${fd?.interestRate||""}" placeholder="7.5"/></div>
+        <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="f_startDate" type="date" value="${fd?.startDate||""}"/></div>
+        <div class="form-group"><label class="form-label">Maturity Date</label><input class="form-input" id="f_maturityDate" type="date" value="${fd?.maturityDate||""}"/></div>
+        <div class="form-group"><label class="form-label">Auto-Renewal</label><div class="checkbox-row"><input type="checkbox" id="f_autoRenew" ${fd?.autoRenew?"checked":""}/><span style="font-size:13px">Enable auto-renewal</span></div></div>
+        <div class="form-group full"><label class="form-label">Notes</label><input class="form-input" id="f_notes" value="${esc(fd?.notes||"")}" placeholder="Optional..."/></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveFD()">✓ Save</button></div>`;
+    }
+
+    function openAddFD() { editingItem = null; openModal("Add Fixed Deposit", fdFormHTML()); }
+    function openEditFD(id) { editingItem = state.fds.find(f=>f.id===id); openModal("Edit Fixed Deposit", fdFormHTML(editingItem)); }
+
+    function saveFD() {
+      const fd = {
+        bankName: document.getElementById("f_bankName").value,
+        amount: document.getElementById("f_amount").value,
+        interestRate: document.getElementById("f_interestRate").value,
+        startDate: document.getElementById("f_startDate").value,
+        maturityDate: document.getElementById("f_maturityDate").value,
+        autoRenew: document.getElementById("f_autoRenew").checked,
+        notes: document.getElementById("f_notes").value,
+      };
+      if (!fd.bankName || !fd.amount) return;
+      if (editingItem) { Object.assign(editingItem, fd); }
+      else { state.fds.push({ ...fd, id: genId() }); }
+      saveData(); closeModal(); render();
+    }
+
+    function deleteFD(id) { if(confirm("Delete this FD?")) { state.fds = state.fds.filter(f=>f.id!==id); saveData(); render(); }}
+
+    // MF Modal
+    function mfFormHTML(mf) {
+      const cats = ["Equity","Debt","Hybrid","Index","ELSS","Liquid"];
+      return `<div class="form-grid">
+        <div class="form-group full"><label class="form-label">Fund Name</label><input class="form-input" id="f_fundName" value="${esc(mf?.fundName||"")}" placeholder="e.g. Axis Bluechip Fund"/></div>
+        <div class="form-group"><label class="form-label">Folio Number</label><input class="form-input" id="f_folioNumber" value="${esc(mf?.folioNumber||"")}" placeholder="1234567890"/></div>
+        <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f_category">${cats.map(c=>`<option ${mf?.category===c?"selected":""}>${c}</option>`).join("")}</select></div>
+        <div class="form-group"><label class="form-label">SIP Amount (₹)</label><input class="form-input" id="f_sipAmount" type="number" value="${mf?.sipAmount||""}" placeholder="5000"/></div>
+        <div class="form-group"><label class="form-label">SIP Day (1-28)</label><input class="form-input" id="f_sipDay" type="number" min="1" max="28" value="${mf?.sipDay||""}" placeholder="5"/></div>
+        <div class="form-group"><label class="form-label">Total Invested (₹)</label><input class="form-input" id="f_totalInvested" type="number" value="${mf?.totalInvested||""}" placeholder="60000"/></div>
+        <div class="form-group"><label class="form-label">Current Value (₹)</label><input class="form-input" id="f_currentValue" type="number" value="${mf?.currentValue||""}" placeholder="65000"/></div>
+        <div class="form-group"><label class="form-label">Units Held</label><input class="form-input" id="f_units" type="number" step="0.001" value="${mf?.units||""}" placeholder="150.25"/></div>
+        <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="f_mfNotes" value="${esc(mf?.notes||"")}" placeholder="Optional..."/></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveMF()">✓ Save</button></div>`;
+    }
+
+    function openAddMF() { editingItem = null; openModal("Add Mutual Fund", mfFormHTML()); }
+    function openEditMF(id) { editingItem = state.mutualFunds.find(m=>m.id===id); openModal("Edit Mutual Fund", mfFormHTML(editingItem)); }
+
+    function saveMF() {
+      const mf = {
+        fundName: document.getElementById("f_fundName").value,
+        folioNumber: document.getElementById("f_folioNumber").value,
+        category: document.getElementById("f_category").value,
+        sipAmount: document.getElementById("f_sipAmount").value,
+        sipDay: document.getElementById("f_sipDay").value,
+        totalInvested: document.getElementById("f_totalInvested").value,
+        currentValue: document.getElementById("f_currentValue").value,
+        units: document.getElementById("f_units").value,
+        notes: document.getElementById("f_mfNotes").value,
+      };
+      if (!mf.fundName || !mf.sipAmount) return;
+      if (editingItem) { Object.assign(editingItem, mf); }
+      else { state.mutualFunds.push({ ...mf, id: genId() }); }
+      saveData(); closeModal(); render();
+    }
+
+    function deleteMF(id) { if(confirm("Delete this fund?")) { state.mutualFunds = state.mutualFunds.filter(m=>m.id!==id); saveData(); render(); }}
+
+    // Stock Modal
+    function stockFormHTML(st) {
+      return `<div class="form-grid">
+        <div class="form-group"><label class="form-label">Stock Symbol</label><input class="form-input" id="f_symbol" value="${esc(st?.symbol||"")}" placeholder="RELIANCE" style="text-transform:uppercase"/></div>
+        <div class="form-group"><label class="form-label">Company Name</label><input class="form-input" id="f_companyName" value="${esc(st?.companyName||"")}" placeholder="Reliance Industries"/></div>
+        <div class="form-group"><label class="form-label">Quantity</label><input class="form-input" id="f_quantity" type="number" value="${st?.quantity||""}" placeholder="10"/></div>
+        <div class="form-group"><label class="form-label">Buy Price (₹)</label><input class="form-input" id="f_buyPrice" type="number" step="0.01" value="${st?.buyPrice||""}" placeholder="2450"/></div>
+        <div class="form-group"><label class="form-label">Current Price (₹)</label><input class="form-input" id="f_currentPrice" type="number" step="0.01" value="${st?.currentPrice||""}" placeholder="2600"/></div>
+        <div class="form-group"><label class="form-label">Buy Date</label><input class="form-input" id="f_buyDate" type="date" value="${st?.buyDate||""}"/></div>
+        <div class="form-group"><label class="form-label">Sector</label><input class="form-input" id="f_sector" value="${esc(st?.sector||"")}" placeholder="Energy, IT, Banking"/></div>
+        <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="f_stNotes" value="${esc(st?.notes||"")}" placeholder="Optional..."/></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveStock()">✓ Save</button></div>`;
+    }
+
+    function openAddStock() { editingItem = null; openModal("Add Stock", stockFormHTML()); }
+    function openEditStock(id) { editingItem = state.stocks.find(s=>s.id===id); openModal("Edit Stock", stockFormHTML(editingItem)); }
+
+    function saveStock() {
+      const st = {
+        symbol: document.getElementById("f_symbol").value.toUpperCase(),
+        companyName: document.getElementById("f_companyName").value,
+        quantity: document.getElementById("f_quantity").value,
+        buyPrice: document.getElementById("f_buyPrice").value,
+        currentPrice: document.getElementById("f_currentPrice").value,
+        buyDate: document.getElementById("f_buyDate").value,
+        sector: document.getElementById("f_sector").value,
+        notes: document.getElementById("f_stNotes").value,
+      };
+      if (!st.symbol || !st.quantity) return;
+      if (editingItem) { Object.assign(editingItem, st); }
+      else { state.stocks.push({ ...st, id: genId() }); }
+      saveData(); closeModal(); render();
+    }
+
+    function deleteStock(id) { if(confirm("Delete this stock?")) { state.stocks = state.stocks.filter(s=>s.id!==id); saveData(); render(); }}
+
+    // ================ NAVIGATION ================
+    function switchTab(i) { activeTab = i; render(); }
+
+    // ================ NOTIF PANEL ================
+    document.getElementById("bellBtn").addEventListener("click", () => {
+      const panel = document.getElementById("notifPanel");
+      panel.classList.toggle("hidden");
+      if (!panel.classList.contains("hidden")) {
+        const alerts = getAlerts();
+        panel.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="card-title" style="font-size:15px">Notifications</div><button class="btn-icon" onclick="document.getElementById('notifPanel').classList.add('hidden')">✕</button></div>` +
+          (alerts.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:13px">You\'re all caught up!</div>' :
+           alerts.map(a => `<div class="alert-item alert-${a.urgency}"><div style="color:${a.urgency==="critical"?"var(--red)":"var(--amber)"}">⚠</div><div><div class="alert-title">${esc(a.title)}</div><div class="alert-detail">${esc(a.detail)}</div></div></div>`).join(""));
+      }
+    });
+
+    // Click outside to close
+    document.getElementById("mainContent").addEventListener("click", () => {
+      document.getElementById("notifPanel").classList.add("hidden");
+    });
+
+    // ================ AUTO-UPDATER UI ================
+    let updateDismissed = false;
+
+    function showUpdateBanner(status, message, extra = {}) {
+      if (updateDismissed && status !== "ready") return;
+      const banner = document.getElementById("updateBanner");
+      const msg = document.getElementById("updateMsg");
+      const progress = document.getElementById("updateProgress");
+      const fill = document.getElementById("updateProgressFill");
+      const installBtn = document.getElementById("updateInstallBtn");
+
+      // Reset classes
+      banner.className = "update-banner";
+      progress.classList.add("hidden");
+      installBtn.classList.add("hidden");
+
+      switch (status) {
+        case "checking":
+          banner.classList.add("checking");
+          msg.textContent = message;
+          // Auto-hide after 3 seconds
+          setTimeout(() => {
+            if (msg.textContent === message) banner.classList.add("hidden");
+          }, 3000);
+          break;
+
+        case "available":
+        case "downloading":
+          banner.classList.add("downloading");
+          msg.textContent = message;
+          if (extra.percent !== undefined) {
+            progress.classList.remove("hidden");
+            fill.style.width = extra.percent + "%";
+          }
+          break;
+
+        case "ready":
+          banner.classList.add("ready");
+          msg.textContent = message;
+          installBtn.classList.remove("hidden");
+          updateDismissed = false; // Always show "ready" banner
+          break;
+
+        case "error":
+          banner.classList.add("error");
+          msg.textContent = message;
+          setTimeout(() => banner.classList.add("hidden"), 5000);
+          break;
+
+        case "up-to-date":
+          // Brief flash then hide
+          banner.classList.add("checking");
+          msg.textContent = message;
+          setTimeout(() => banner.classList.add("hidden"), 2000);
+          break;
+
+        default:
+          banner.classList.add("hidden");
+          return;
+      }
+    }
+
+    function installUpdate() {
+      if (window.electronAPI) {
+        window.electronAPI.installUpdate();
+      }
+    }
+
+    function dismissUpdate() {
+      document.getElementById("updateBanner").classList.add("hidden");
+      updateDismissed = true;
+    }
+
+    // Listen for update events from main process
+    if (window.electronAPI?.onUpdateStatus) {
+      window.electronAPI.onUpdateStatus((data) => {
+        showUpdateBanner(data.status, data.message, data);
+      });
+    }
+
+    // Set version tag
+    if (window.electronAPI?.getVersion) {
+      window.electronAPI.getVersion().then((v) => {
+        document.getElementById("versionTag").textContent = "v" + v;
+      });
+    }
+
+    // ================ INIT ================
+    loadData().then(render);
+  </script>
+</body>
+</html>
