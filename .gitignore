@@ -17,3 +17,4 @@ Thumbs.db
 *.swp
 *.swo
 *.swn
+.DS_Store
