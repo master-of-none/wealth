@@ -1,56 +1,57 @@
 {
-  "name": "wealthpulse",
-  "version": "1.0.0",
-  "description": "Personal Finance Tracker — FDs, Mutual Funds & Stocks",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "build": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux",
-    "publish": "electron-builder --publish always",
-    "publish:win": "electron-builder --win --publish always",
-    "publish:mac": "electron-builder --mac --publish always",
-    "publish:linux": "electron-builder --linux --publish always"
-  },
-  "build": {
-    "appId": "com.wealthpulse.app",
-    "productName": "WealthPulse",
-    "directories": {
-      "output": "dist"
+    "name": "wealth",
+    "author": "Shrikrishna Bhat",
+    "version": "1.0.0",
+    "description": "Personal Finance Tracker — FDs, Mutual Funds & Stocks",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder",
+        "build:win": "electron-builder --win --x64",
+        "build:mac": "electron-builder --mac",
+        "build:linux": "electron-builder --linux",
+        "publish": "electron-builder --publish always",
+        "publish:win": "electron-builder --win --publish always",
+        "publish:mac": "electron-builder --mac --publish always",
+        "publish:linux": "electron-builder --linux --publish always"
     },
-    "files": [
-      "main.js",
-      "preload.js",
-      "src/**/*"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "YOUR_GITHUB_USERNAME",
-      "repo": "wealthpulse",
-      "releaseType": "release"
+    "build": {
+        "appId": "com.wealth.app",
+        "productName": "Wealth",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "main.js",
+            "preload.js",
+            "src/**/*"
+        ],
+        "publish": {
+            "provider": "github",
+            "owner": "master-of-none",
+            "repo": "wealth",
+            "releaseType": "release"
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "assets/wealth.ico"
+        },
+        "mac": {
+            "target": "dmg",
+            "icon": "assets/wealth.icns"
+        },
+        "linux": {
+            "target": "AppImage",
+            "icon": "assets/wealth.png"
+        }
     },
-    "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+    "devDependencies": {
+        "electron": "^33.0.0",
+        "electron-builder": "^25.1.8"
     },
-    "mac": {
-      "target": "dmg",
-      "icon": "assets/icon.icns"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png"
+    "dependencies": {
+        "electron-store": "^8.2.0",
+        "electron-updater": "^6.3.9",
+        "node-schedule": "^2.1.1"
     }
-  },
-  "devDependencies": {
-    "electron": "^33.0.0",
-    "electron-builder": "^25.1.8"
-  },
-  "dependencies": {
-    "electron-store": "^10.0.0",
-    "electron-updater": "^6.3.9",
-    "node-schedule": "^2.1.1"
-  }
 }
