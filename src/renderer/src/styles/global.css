@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    background: #0a0e17;
+    color: #e8e6e1;
+    overflow: hidden;
+  }
+  #root { display: flex; flex-direction: column; height: 100vh; }
+}
+
+@layer utilities {
+  .app-drag { -webkit-app-region: drag; }
+  .app-no-drag { -webkit-app-region: no-drag; }
+
+  /* custom scrollbar */
+  .scrollbar-gold::-webkit-scrollbar { width: 6px; }
+  .scrollbar-gold::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-gold::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 3px; }
+
+  /* accent color */
+  .accent-gold { accent-color: #d4af37; }
+}
