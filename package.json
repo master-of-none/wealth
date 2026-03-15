@@ -1,7 +1,7 @@
 {
     "name": "wealth",
     "author": "Shrikrishna Bhat",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Personal Finance Tracker — FDs, Mutual Funds & Stocks",
     "main": "out/main/index.js",
     "scripts": {
