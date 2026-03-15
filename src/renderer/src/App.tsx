@@ -9,6 +9,9 @@ import Dashboard from './components/Dashboard/Dashboard'
 import FixedDeposits from './components/FixedDeposits/FixedDeposits'
 import MutualFunds from './components/MutualFunds/MutualFunds'
 import Stocks from './components/Stocks/Stocks'
+import PostalAccounts from './components/PostalAccounts/PostalAccounts'
+import InsurancePrivate from './components/Insurance/InsurancePrivate'
+import InsuranceLIC from './components/Insurance/InsuranceLIC'
 
 type ElectronAPI = {
   getVersion: () => Promise<string>
@@ -31,8 +34,17 @@ export default function App() {
   const [updateDismissed, setUpdateDismissed] = useState(false)
   const [version, setVersion] = useState('')
 
-  const { fds, mutualFunds, stocks, loading, updateFDs, updateMutualFunds, updateStocks } = useStore()
-  const alerts = useAlerts(fds, mutualFunds)
+  const {
+    fds, mutualFunds, stocks, postalAccounts, insurancePrivate, insuranceLIC,
+    dismissedAlerts, permanentlyClearedAlerts, dismissAlert, clearAllDismissed,
+    loading,
+    updateFDs, updateMutualFunds, updateStocks, updatePostalAccounts, updateInsurancePrivate, updateInsuranceLIC,
+  } = useStore()
+
+  const allAlerts = useAlerts(fds, mutualFunds, postalAccounts, insurancePrivate, insuranceLIC)
+  const suppressed = new Set([...dismissedAlerts, ...permanentlyClearedAlerts])
+  const alerts = allAlerts.filter((a) => !suppressed.has(a.id))
+  const dismissedAlertItems = allAlerts.filter((a) => dismissedAlerts.includes(a.id))
 
   useEffect(() => {
     if (window.electronAPI?.getVersion) {
@@ -110,7 +122,13 @@ export default function App() {
       )}
 
       {notifOpen && (
-        <Notifications alerts={alerts} onClose={() => setNotifOpen(false)} />
+        <Notifications
+          alerts={alerts}
+          dismissedAlerts={dismissedAlertItems}
+          onClose={() => setNotifOpen(false)}
+          onDismiss={dismissAlert}
+          onClearAllDismissed={clearAllDismissed}
+        />
       )}
 
       <main className="flex-1 p-6 overflow-y-auto scrollbar-gold" onClick={() => setNotifOpen(false)}>
@@ -120,6 +138,9 @@ export default function App() {
         {activeTab === 1 && <FixedDeposits fds={fds} onUpdate={updateFDs} />}
         {activeTab === 2 && <MutualFunds mutualFunds={mutualFunds} onUpdate={updateMutualFunds} />}
         {activeTab === 3 && <Stocks stocks={stocks} onUpdate={updateStocks} />}
+        {activeTab === 4 && <PostalAccounts postalAccounts={postalAccounts} onUpdate={updatePostalAccounts} />}
+        {activeTab === 5 && <InsurancePrivate insurancePrivate={insurancePrivate} onUpdate={updateInsurancePrivate} />}
+        {activeTab === 6 && <InsuranceLIC insuranceLIC={insuranceLIC} onUpdate={updateInsuranceLIC} />}
       </main>
     </>
   )

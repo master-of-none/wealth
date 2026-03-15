@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { FixedDeposit, MutualFund, AlertItem } from '../types'
+import { FixedDeposit, MutualFund, PostalAccount, InsurancePrivate, InsuranceLIC, AlertItem } from '../types'
 
 function daysUntil(dateStr: string | undefined): number {
   if (!dateStr) return Infinity
@@ -27,6 +27,15 @@ function ordinal(n: number): string {
   return n + (s[(v - 20) % 10] || s[v] || s[0])
 }
 
+function nextAnniversary(openingDate: string): string {
+  const open = new Date(openingDate)
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  let next = new Date(now.getFullYear(), open.getMonth(), open.getDate())
+  if (next <= now) next = new Date(now.getFullYear() + 1, open.getMonth(), open.getDate())
+  return next.toISOString().split('T')[0]
+}
+
 export function fmt(amount: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -49,7 +58,13 @@ export function useDaysToSIP(day: number | string | undefined): number | null {
   return daysToSIP(Number(day))
 }
 
-export function useAlerts(fds: FixedDeposit[], mutualFunds: MutualFund[]): AlertItem[] {
+export function useAlerts(
+  fds: FixedDeposit[],
+  mutualFunds: MutualFund[],
+  postalAccounts: PostalAccount[] = [],
+  insurancePrivate: InsurancePrivate[] = [],
+  insuranceLIC: InsuranceLIC[] = []
+): AlertItem[] {
   return useMemo(() => {
     const alerts: AlertItem[] = []
 
@@ -96,6 +111,81 @@ export function useAlerts(fds: FixedDeposit[], mutualFunds: MutualFund[]): Alert
       }
     })
 
+    postalAccounts.forEach((pa) => {
+      const d = daysUntil(pa.closingDate)
+      if (d <= 0) {
+        alerts.push({
+          id: `postal-m-${pa.id}`,
+          urgency: 'critical',
+          title: `${pa.name} Postal Account Matured!`,
+          detail: `${fmt(pa.maturityAmount)} — Action needed`,
+          days: d,
+        })
+      } else if (d <= 7) {
+        alerts.push({
+          id: `postal-7-${pa.id}`,
+          urgency: 'critical',
+          title: `${pa.name} Postal Account in ${d}d`,
+          detail: `${fmt(pa.maturityAmount)} matures ${fmtDate(pa.closingDate)}`,
+          days: d,
+        })
+      } else if (d <= 30) {
+        alerts.push({
+          id: `postal-30-${pa.id}`,
+          urgency: 'warning',
+          title: `${pa.name} Postal Account in ${d}d`,
+          detail: `${fmt(pa.maturityAmount)} matures ${fmtDate(pa.closingDate)}`,
+          days: d,
+        })
+      }
+    })
+
+    insurancePrivate.forEach((ins) => {
+      if (!ins.openingDate) return
+      const anniversary = nextAnniversary(ins.openingDate)
+      const d = daysUntil(anniversary)
+      if (d <= 7) {
+        alerts.push({
+          id: `ins-priv-7-${ins.id}`,
+          urgency: 'critical',
+          title: `${ins.companyName} Premium due in ${d}d`,
+          detail: `${ins.policyName || ins.policyNo} — ${fmt(ins.premium)} due ${fmtDate(anniversary)}`,
+          days: d,
+        })
+      } else if (d <= 30) {
+        alerts.push({
+          id: `ins-priv-30-${ins.id}`,
+          urgency: 'warning',
+          title: `${ins.companyName} Premium due in ${d}d`,
+          detail: `${ins.policyName || ins.policyNo} — ${fmt(ins.premium)} due ${fmtDate(anniversary)}`,
+          days: d,
+        })
+      }
+    })
+
+    insuranceLIC.forEach((ins) => {
+      if (!ins.openingDate) return
+      const anniversary = nextAnniversary(ins.openingDate)
+      const d = daysUntil(anniversary)
+      if (d <= 7) {
+        alerts.push({
+          id: `ins-lic-7-${ins.id}`,
+          urgency: 'critical',
+          title: `LIC Premium due in ${d}d`,
+          detail: `${ins.policyNo} (${ins.holderName}) — ${fmt(ins.premium)} due ${fmtDate(anniversary)}`,
+          days: d,
+        })
+      } else if (d <= 30) {
+        alerts.push({
+          id: `ins-lic-30-${ins.id}`,
+          urgency: 'warning',
+          title: `LIC Premium due in ${d}d`,
+          detail: `${ins.policyNo} (${ins.holderName}) — ${fmt(ins.premium)} due ${fmtDate(anniversary)}`,
+          days: d,
+        })
+      }
+    })
+
     return alerts.sort((a, b) => a.days - b.days)
-  }, [fds, mutualFunds])
+  }, [fds, mutualFunds, postalAccounts, insurancePrivate, insuranceLIC])
 }

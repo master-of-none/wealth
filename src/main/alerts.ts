@@ -24,6 +24,15 @@ function getNextSIPDate(sipDay: number): string {
   return next.toISOString().split('T')[0]
 }
 
+function nextAnniversary(openingDate: string): string {
+  const open = new Date(openingDate)
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  let next = new Date(now.getFullYear(), open.getMonth(), open.getDate())
+  if (next <= now) next = new Date(now.getFullYear() + 1, open.getMonth(), open.getDate())
+  return next.toISOString().split('T')[0]
+}
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -47,10 +56,20 @@ function showNotification(title: string, body: string): void {
 }
 
 export function checkAndNotify(): void {
-  const data = store.get('finance-data', { fds: [], mutualFunds: [], stocks: [] }) as {
+  const data = store.get('finance-data', {
+    fds: [],
+    mutualFunds: [],
+    stocks: [],
+    postalAccounts: [],
+    insurancePrivate: [],
+    insuranceLIC: [],
+  }) as {
     fds: Array<{ bankName: string; amount: number; interestRate: number; maturityDate: string; autoRenew: boolean }>
     mutualFunds: Array<{ fundName: string; sipAmount: number; sipDay?: number | string }>
     stocks: unknown[]
+    postalAccounts: Array<{ name: string; closingDate: string; maturityAmount: number }>
+    insurancePrivate: Array<{ companyName: string; policyNo: string; policyName?: string; openingDate: string; premium: number }>
+    insuranceLIC: Array<{ holderName: string; policyNo: string; openingDate: string; premium: number }>
   }
 
   data.fds.forEach((fd) => {
@@ -88,6 +107,66 @@ export function checkAndNotify(): void {
       showNotification('📈 SIP Due Tomorrow', `${mf.fundName}: SIP of ${formatCurrency(mf.sipAmount)} is due tomorrow.`)
     } else if (days === 3) {
       showNotification('📈 SIP Coming Up', `${mf.fundName}: SIP of ${formatCurrency(mf.sipAmount)} is due in 3 days.`)
+    }
+  })
+
+  data.postalAccounts.forEach((pa) => {
+    const days = daysUntil(pa.closingDate)
+    if (days === 0) {
+      showNotification(
+        '📮 Postal Account Matured Today!',
+        `${pa.name}: ${formatCurrency(pa.maturityAmount)} has matured. Please take action.`
+      )
+    } else if (days === 1) {
+      showNotification(
+        '📮 Postal Account Maturing Tomorrow!',
+        `${pa.name}: ${formatCurrency(pa.maturityAmount)} matures tomorrow.`
+      )
+    } else if (days === 7) {
+      showNotification(
+        '📮 Postal Account Maturing in 7 Days',
+        `${pa.name}: ${formatCurrency(pa.maturityAmount)} matures in one week.`
+      )
+    } else if (days === 30) {
+      showNotification(
+        '📮 Postal Account Maturing in 30 Days',
+        `${pa.name}: ${formatCurrency(pa.maturityAmount)} matures in one month.`
+      )
+    }
+  })
+
+  data.insurancePrivate.forEach((ins) => {
+    if (!ins.openingDate) return
+    const anniversary = nextAnniversary(ins.openingDate)
+    const days = daysUntil(anniversary)
+    const policyLabel = ins.policyName || ins.policyNo
+    if (days === 7) {
+      showNotification(
+        `🛡️ ${ins.companyName} Premium in 7 Days`,
+        `${policyLabel}: ${formatCurrency(ins.premium)} premium due in one week.`
+      )
+    } else if (days === 30) {
+      showNotification(
+        `🛡️ ${ins.companyName} Premium in 30 Days`,
+        `${policyLabel}: ${formatCurrency(ins.premium)} premium due in one month.`
+      )
+    }
+  })
+
+  data.insuranceLIC.forEach((ins) => {
+    if (!ins.openingDate) return
+    const anniversary = nextAnniversary(ins.openingDate)
+    const days = daysUntil(anniversary)
+    if (days === 7) {
+      showNotification(
+        `🛡️ LIC Premium in 7 Days`,
+        `${ins.policyNo} (${ins.holderName}): ${formatCurrency(ins.premium)} premium due in one week.`
+      )
+    } else if (days === 30) {
+      showNotification(
+        `🛡️ LIC Premium in 30 Days`,
+        `${ins.policyNo} (${ins.holderName}): ${formatCurrency(ins.premium)} premium due in one month.`
+      )
     }
   })
 }

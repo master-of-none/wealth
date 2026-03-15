@@ -1,37 +1,39 @@
 import React, { useState } from 'react'
-import { FixedDeposit } from '../../types'
+import { InsuranceLIC } from '../../types'
 
-interface FDFormProps {
-  initial?: FixedDeposit
-  onSave: (fd: Omit<FixedDeposit, 'id'>) => void
+interface InsuranceLICFormProps {
+  initial?: InsuranceLIC
+  onSave: (ins: Omit<InsuranceLIC, 'id'>) => void
   onCancel: () => void
 }
 
-export default function FDForm({ initial, onSave, onCancel }: FDFormProps) {
-  const [bankName, setBankName] = useState(initial?.bankName || '')
+export default function InsuranceLICForm({ initial, onSave, onCancel }: InsuranceLICFormProps) {
   const [holderName, setHolderName] = useState(initial?.holderName || '')
-  const [amount, setAmount] = useState(initial?.amount?.toString() || '')
-  const [interestRate, setInterestRate] = useState(initial?.interestRate?.toString() || '')
-  const [startDate, setStartDate] = useState(initial?.startDate || '')
-  const [maturityDate, setMaturityDate] = useState(initial?.maturityDate || '')
+  const [policyNo, setPolicyNo] = useState(initial?.policyNo || '')
+  const [openingDate, setOpeningDate] = useState(initial?.openingDate || '')
+  const [closingDate, setClosingDate] = useState(initial?.closingDate || '')
+  const [premium, setPremium] = useState(initial?.premium?.toString() || '')
+  const [fundValue, setFundValue] = useState(initial?.fundValue?.toString() || '')
+  const [fundValueDate, setFundValueDate] = useState(initial?.fundValueDate || '')
   const [accountNo, setAccountNo] = useState(initial?.accountNo || '')
+  const [premiumsPaidUpto, setPremiumsPaidUpto] = useState(initial?.premiumsPaidUpto || '')
   const [nominee, setNominee] = useState(initial?.nominee || '')
-  const [autoRenew, setAutoRenew] = useState(initial?.autoRenew || false)
   const [notes, setNotes] = useState(initial?.notes || '')
 
   function handleSubmit() {
-    if (!bankName || !amount) return
+    if (!holderName || !policyNo || !premium) return
     onSave({
-      bankName,
       holderName,
-      amount: Number(amount),
-      interestRate: Number(interestRate),
-      startDate,
-      maturityDate,
-      accountNo,
-      nominee,
-      autoRenew,
-      notes,
+      policyNo,
+      openingDate,
+      closingDate,
+      premium: Number(premium),
+      fundValue: fundValue ? Number(fundValue) : undefined,
+      fundValueDate: fundValueDate || undefined,
+      accountNo: accountNo || undefined,
+      premiumsPaidUpto: premiumsPaidUpto || undefined,
+      nominee: nominee || undefined,
+      notes: notes || undefined,
     })
   }
 
@@ -42,60 +44,68 @@ export default function FDForm({ initial, onSave, onCancel }: FDFormProps) {
     <>
       <div className="grid grid-cols-2 gap-3.5">
         <div className="flex flex-col">
-          <label className={labelClass}>Bank Name</label>
-          <input
-            className={inputClass}
-            value={bankName}
-            onChange={(e) => setBankName(e.target.value)}
-            placeholder="e.g. SBI, HDFC"
-          />
-        </div>
-        <div className="flex flex-col">
           <label className={labelClass}>Holder Name</label>
           <input
             className={inputClass}
             value={holderName}
             onChange={(e) => setHolderName(e.target.value)}
-            placeholder="e.g. VPH+SVH"
+            placeholder="Policy holder name"
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Amount (₹)</label>
+          <label className={labelClass}>Policy No</label>
           <input
             className={inputClass}
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="100000"
+            value={policyNo}
+            onChange={(e) => setPolicyNo(e.target.value)}
+            placeholder="Policy number"
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Interest Rate (%)</label>
-          <input
-            className={inputClass}
-            type="number"
-            step="0.01"
-            value={interestRate}
-            onChange={(e) => setInterestRate(e.target.value)}
-            placeholder="7.5"
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className={labelClass}>Start Date</label>
+          <label className={labelClass}>Opening Date</label>
           <input
             className={inputClass}
             type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            value={openingDate}
+            onChange={(e) => setOpeningDate(e.target.value)}
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Maturity Date</label>
+          <label className={labelClass}>Closing Date</label>
           <input
             className={inputClass}
             type="date"
-            value={maturityDate}
-            onChange={(e) => setMaturityDate(e.target.value)}
+            value={closingDate}
+            onChange={(e) => setClosingDate(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className={labelClass}>Annual Premium (₹)</label>
+          <input
+            className={inputClass}
+            type="number"
+            value={premium}
+            onChange={(e) => setPremium(e.target.value)}
+            placeholder="25000"
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className={labelClass}>Fund Value (₹)</label>
+          <input
+            className={inputClass}
+            type="number"
+            value={fundValue}
+            onChange={(e) => setFundValue(e.target.value)}
+            placeholder="Optional"
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className={labelClass}>Fund Value Date</label>
+          <input
+            className={inputClass}
+            type="date"
+            value={fundValueDate}
+            onChange={(e) => setFundValueDate(e.target.value)}
           />
         </div>
         <div className="flex flex-col">
@@ -104,7 +114,16 @@ export default function FDForm({ initial, onSave, onCancel }: FDFormProps) {
             className={inputClass}
             value={accountNo}
             onChange={(e) => setAccountNo(e.target.value)}
-            placeholder="Bank account number"
+            placeholder="Account number"
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className={labelClass}>Premiums Paid Upto</label>
+          <input
+            className={inputClass}
+            type="date"
+            value={premiumsPaidUpto}
+            onChange={(e) => setPremiumsPaidUpto(e.target.value)}
           />
         </div>
         <div className="flex flex-col">
@@ -115,18 +134,6 @@ export default function FDForm({ initial, onSave, onCancel }: FDFormProps) {
             onChange={(e) => setNominee(e.target.value)}
             placeholder="Nominee name"
           />
-        </div>
-        <div className="flex flex-col">
-          <label className={labelClass}>Auto-Renewal</label>
-          <div className="flex items-center gap-2 py-2.5">
-            <input
-              type="checkbox"
-              className="accent-gold w-4 h-4"
-              checked={autoRenew}
-              onChange={(e) => setAutoRenew(e.target.checked)}
-            />
-            <span className="text-[13px]">Enable auto-renewal</span>
-          </div>
         </div>
         <div className="flex flex-col col-span-2">
           <label className={labelClass}>Notes</label>

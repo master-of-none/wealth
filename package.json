@@ -6,6 +6,8 @@
     "main": "out/main/index.js",
     "scripts": {
         "dev": "electron-vite dev",
+        "electron:dev": "concurrently \"electron-vite dev\"",
+        "electron:build": "electron-vite build && electron-builder",
         "build": "electron-vite build",
         "preview": "electron-vite preview",
         "dist": "npm run build && electron-builder",
@@ -50,6 +52,7 @@
         "@types/react-dom": "^18.3.1",
         "@vitejs/plugin-react": "^4.3.4",
         "autoprefixer": "^10.4.27",
+        "concurrently": "^9.2.1",
         "electron": "^33.0.0",
         "electron-builder": "^25.1.8",
         "electron-vite": "^2.3.0",

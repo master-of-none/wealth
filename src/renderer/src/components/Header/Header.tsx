@@ -8,7 +8,7 @@ interface HeaderProps {
   version: string
 }
 
-const TABS = ['Dashboard', 'Fixed Deposits', 'Mutual Funds', 'Stocks']
+const TABS = ['Dashboard', 'Fixed Deposits', 'Mutual Funds', 'Stocks', 'Postal', 'Ins. Private', 'LIC']
 
 const TAB_ICONS = [
   <svg key="dashboard" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
@@ -23,6 +23,15 @@ const TAB_ICONS = [
   </svg>,
   <svg key="stocks" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
     <path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" />
+  </svg>,
+  <svg key="postal" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path d="M3 8l9 6 9-6" /><rect x="2" y="6" width="20" height="14" rx="2" />
+  </svg>,
+  <svg key="ins-private" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path d="M12 2l7 4v6c0 4.5-3 8-7 10C5 20 2 16.5 2 12V6l10-4z" />
+  </svg>,
+  <svg key="lic" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path d="M12 2l7 4v6c0 4.5-3 8-7 10C5 20 2 16.5 2 12V6l10-4z" /><path d="M9 12l2 2 4-4" />
   </svg>,
 ]
 
@@ -44,8 +53,8 @@ export default function Header({ activeTab, onTabChange, alertCount, onBellClick
             key={t}
             className={
               activeTab === i
-                ? 'px-[18px] py-2 rounded-lg border-none cursor-pointer text-[13px] font-semibold text-[#0a0e17] bg-gradient-to-br from-[#d4af37] to-[#c5a028] transition-all duration-200 flex items-center gap-1.5 app-no-drag'
-                : 'px-[18px] py-2 rounded-lg border-none cursor-pointer text-[13px] font-normal text-[#8a9bb5] bg-transparent transition-all duration-200 flex items-center gap-1.5 app-no-drag hover:text-[#e8e6e1] hover:bg-white/5'
+                ? 'px-[14px] py-2 rounded-lg border-none cursor-pointer text-[12px] font-semibold text-[#0a0e17] bg-gradient-to-br from-[#d4af37] to-[#c5a028] transition-all duration-200 flex items-center gap-1.5 app-no-drag'
+                : 'px-[14px] py-2 rounded-lg border-none cursor-pointer text-[12px] font-normal text-[#8a9bb5] bg-transparent transition-all duration-200 flex items-center gap-1.5 app-no-drag hover:text-[#e8e6e1] hover:bg-white/5'
             }
             onClick={() => onTabChange(i)}
           >
