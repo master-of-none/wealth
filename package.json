@@ -1,19 +1,21 @@
 {
     "name": "wealth",
     "author": "Shrikrishna Bhat",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Personal Finance Tracker — FDs, Mutual Funds & Stocks",
-    "main": "main.js",
+    "main": "out/main/index.js",
     "scripts": {
-        "start": "electron .",
-        "build": "electron-builder",
-        "build:win": "electron-builder --win --x64",
-        "build:mac": "electron-builder --mac",
-        "build:linux": "electron-builder --linux",
-        "publish": "electron-builder --publish always",
-        "publish:win": "electron-builder --win --x64 --publish always",
-        "publish:mac": "electron-builder --mac --publish always",
-        "publish:linux": "electron-builder --linux --publish always"
+        "dev": "electron-vite dev",
+        "electron:dev": "concurrently \"electron-vite dev\"",
+        "electron:build": "electron-vite build && electron-builder",
+        "build": "electron-vite build",
+        "preview": "electron-vite preview",
+        "dist": "npm run build && electron-builder",
+        "dist:mac": "npm run build && electron-builder --mac",
+        "publish": "npm run build && electron-builder --publish always",
+        "publish:win": "npm run build && electron-builder --win --x64 --publish always",
+        "publish:mac": "npm run build && electron-builder --mac --publish always",
+        "publish:linux": "npm run build && electron-builder --linux --publish always"
     },
     "build": {
         "appId": "com.wealth.app",
@@ -22,9 +24,8 @@
             "output": "dist"
         },
         "files": [
-            "main.js",
-            "preload.js",
-            "src/**/*"
+            "out/**/*",
+            "assets/**/*"
         ],
         "publish": {
             "provider": "github",
@@ -46,12 +47,24 @@
         }
     },
     "devDependencies": {
+        "@types/node": "^22.10.2",
+        "@types/react": "^18.3.12",
+        "@types/react-dom": "^18.3.1",
+        "@vitejs/plugin-react": "^4.3.4",
+        "autoprefixer": "^10.4.27",
+        "concurrently": "^9.2.1",
         "electron": "^33.0.0",
-        "electron-builder": "^25.1.8"
+        "electron-builder": "^25.1.8",
+        "electron-vite": "^2.3.0",
+        "postcss": "^8.5.8",
+        "tailwindcss": "^3.4.19",
+        "typescript": "^5.7.2"
     },
     "dependencies": {
         "electron-store": "^8.2.0",
         "electron-updater": "^6.3.9",
-        "node-schedule": "^2.1.1"
+        "node-schedule": "^2.1.1",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
     }
 }
