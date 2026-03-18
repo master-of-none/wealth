@@ -42,7 +42,7 @@ export default function Header({ activeTab, onTabChange, alertCount, onBellClick
         <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
           <path d="M7 4h10M7 8h10M7 4c0 4 3 8 10 8M7 8c0 6 4 8 7 12" />
         </svg>
-        WealthPulse
+        MyWealth
         <span className="text-[11px] text-[#6b7a91] opacity-70 px-2 py-0.5 border border-white/[0.08] rounded ml-1">
           {version ? `v${version}` : ''}
         </span>

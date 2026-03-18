@@ -10,26 +10,15 @@ interface DashboardProps {
   alerts: AlertItem[]
 }
 
-function daysUntil(dateStr: string | undefined): number {
-  if (!dateStr) return Infinity
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  const t = new Date(dateStr)
-  t.setHours(0, 0, 0, 0)
-  return Math.ceil((t.getTime() - now.getTime()) / 864e5)
-}
-
-function daysToSIP(day: number): number {
-  const now = new Date()
-  let n = new Date(now.getFullYear(), now.getMonth(), day)
-  if (n <= now) n = new Date(now.getFullYear(), now.getMonth() + 1, day)
-  return daysUntil(n.toISOString().split('T')[0])
-}
 
 export default function Dashboard({ fds, mutualFunds, stocks, alerts }: DashboardProps) {
   const totalFD = fds.reduce((s, f) => s + (Number(f.amount) || 0), 0)
   const mfInv = mutualFunds.reduce((s, m) => s + (Number(m.totalInvested) || 0), 0)
-  const mfCur = mutualFunds.reduce((s, m) => s + (Number(m.currentValue) || 0), 0)
+  const mfCur = mutualFunds.reduce((s, m) => {
+    const nav = Number(m.nav) || 0
+    const units = Number(m.units) || 0
+    return s + (units > 0 ? nav * units : nav)
+  }, 0)
   const stInv = stocks.reduce((s, st) => s + (Number(st.quantity) || 0) * (Number(st.buyPrice) || 0), 0)
   const stCur = stocks.reduce(
     (s, st) => s + (Number(st.quantity) || 0) * (Number(st.currentPrice) || Number(st.buyPrice) || 0),
@@ -114,31 +103,27 @@ export default function Dashboard({ fds, mutualFunds, stocks, alerts }: Dashboar
         </div>
       </div>
 
-      {mutualFunds.filter((m) => m.sipDay).length > 0 && (
+      {mutualFunds.filter((m) => m.periodic).length > 0 && (
         <div className="bg-gradient-to-br from-[#141c2e] to-[#111827] border border-[rgba(212,175,55,0.15)] rounded-2xl p-[22px] mb-4">
           <div className="text-base font-semibold text-[#d4af37] font-serif tracking-wide">SIP Schedule</div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2.5 mt-3.5">
             {mutualFunds
-              .filter((m) => m.sipDay)
+              .filter((m) => m.periodic)
               .map((mf) => {
-                const d = daysToSIP(Number(mf.sipDay))
                 return (
                   <div key={mf.id} className="flex items-center gap-3 p-3 rounded-[10px] bg-white/[0.03] border border-white/5">
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                      style={{
-                        background: d <= 3 ? 'rgba(245,158,11,0.15)' : 'rgba(34,197,94,0.1)',
-                        color: d <= 3 ? '#f59e0b' : '#22c55e',
-                      }}
+                      style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e' }}
                     >
-                      {mf.sipDay}
+                      📅
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
                         {mf.fundName}
                       </div>
                       <div className="text-[11px] text-[#6b7a91]">
-                        {fmt(mf.sipAmount)} — {d === 0 ? 'Today' : `in ${d} days`}
+                        {fmt(mf.sipAmount)} — {mf.periodic}
                       </div>
                     </div>
                   </div>
