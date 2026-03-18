@@ -16,11 +16,13 @@ export interface MutualFund {
   id: string
   fundName: string
   folioNumber?: string
-  category: string
+  category?: string
   sipAmount: number
-  sipDay?: number | string
+  periodic?: string
+  initialInvestmentDate?: string
   totalInvested: number
-  currentValue: number
+  nav: number
+  navDate?: string
   units?: number | string
   notes?: string
 }
@@ -32,7 +34,8 @@ export interface Stock {
   quantity: number
   buyPrice: number
   currentPrice: number
-  buyDate?: string
+  priceAsOnDate?: string
+  initialDate?: string
   sector?: string
   notes?: string
 }
@@ -62,7 +65,7 @@ export interface InsurancePrivate {
   fundValue?: number
   fundValueDate?: string
   accountNo?: string
-  premiumsPaidUpto?: string
+  lastPremiumDue?: string
   nominee?: string
   notes?: string
 }
@@ -76,8 +79,7 @@ export interface InsuranceLIC {
   premium: number
   fundValue?: number
   fundValueDate?: string
-  accountNo?: string
-  premiumsPaidUpto?: string
+  lastPremiumDue?: string
   nominee?: string
   notes?: string
 }
