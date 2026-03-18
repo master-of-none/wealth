@@ -13,7 +13,7 @@ function createWindow(): void {
     height: 820,
     minWidth: 960,
     minHeight: 600,
-    title: 'WealthPulse',
+    title: 'MyWealth',
     icon: path.join(__dirname, '../../..', 'assets', 'icon.png'),
     backgroundColor: '#0a0e17',
     webPreferences: {

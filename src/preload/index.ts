@@ -1,10 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // ---- Persistent storage ----
-  storeGet: (key: string) => ipcRenderer.invoke('store-get', key),
-  storeSet: (key: string, value: unknown) => ipcRenderer.invoke('store-set', key, value),
-  storeDelete: (key: string) => ipcRenderer.invoke('store-delete', key),
+  // ---- SQLite DB operations ----
+  dbGetAll: (table: string) => ipcRenderer.invoke('db-get-all', table),
+  dbReplaceAll: (table: string, rows: unknown[]) => ipcRenderer.invoke('db-replace-all', table, rows),
+  dbGetSetting: (key: string) => ipcRenderer.invoke('db-get-setting', key),
+  dbSetSetting: (key: string, value: string) => ipcRenderer.invoke('db-set-setting', key, value),
+  getDbPath: () => ipcRenderer.invoke('get-db-path'),
 
   // ---- Finance notifications ----
   checkAlerts: () => ipcRenderer.invoke('check-alerts'),
@@ -19,10 +21,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (_event: Electron.IpcRendererEvent, data: Record<string, unknown>) =>
       callback(data)
     ipcRenderer.on('update-status', handler)
-    // Return cleanup function
     return () => ipcRenderer.removeListener('update-status', handler)
   },
 
-  // Platform info
   platform: process.platform,
 })
