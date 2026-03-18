@@ -13,8 +13,8 @@ export default function StockForm({ initial, onSave, onCancel }: StockFormProps)
   const [quantity, setQuantity] = useState(initial?.quantity?.toString() || '')
   const [buyPrice, setBuyPrice] = useState(initial?.buyPrice?.toString() || '')
   const [currentPrice, setCurrentPrice] = useState(initial?.currentPrice?.toString() || '')
-  const [buyDate, setBuyDate] = useState(initial?.buyDate || '')
-  const [sector, setSector] = useState(initial?.sector || '')
+  const [priceAsOnDate, setPriceAsOnDate] = useState(initial?.priceAsOnDate || '')
+  const [initialDate, setInitialDate] = useState(initial?.initialDate || initial?.buyDate || '')
   const [notes, setNotes] = useState(initial?.notes || '')
 
   function handleSubmit() {
@@ -25,8 +25,8 @@ export default function StockForm({ initial, onSave, onCancel }: StockFormProps)
       quantity: Number(quantity),
       buyPrice: Number(buyPrice),
       currentPrice: Number(currentPrice),
-      buyDate,
-      sector,
+      priceAsOnDate: priceAsOnDate || undefined,
+      initialDate: initialDate || undefined,
       notes,
     })
   }
@@ -43,7 +43,7 @@ export default function StockForm({ initial, onSave, onCancel }: StockFormProps)
             className={`${inputClass} uppercase`}
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
-            placeholder="RELIANCE"
+            placeholder="ABC"
           />
         </div>
         <div className="flex flex-col">
@@ -52,7 +52,7 @@ export default function StockForm({ initial, onSave, onCancel }: StockFormProps)
             className={inputClass}
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            placeholder="Reliance Industries"
+            placeholder="ABC"
           />
         </div>
         <div className="flex flex-col">
@@ -62,7 +62,7 @@ export default function StockForm({ initial, onSave, onCancel }: StockFormProps)
             type="number"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            placeholder="10"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
@@ -73,36 +73,36 @@ export default function StockForm({ initial, onSave, onCancel }: StockFormProps)
             step="0.01"
             value={buyPrice}
             onChange={(e) => setBuyPrice(e.target.value)}
-            placeholder="2450"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Current Price (₹)</label>
+          <label className={labelClass}>Price (₹)</label>
           <input
             className={inputClass}
             type="number"
             step="0.01"
             value={currentPrice}
             onChange={(e) => setCurrentPrice(e.target.value)}
-            placeholder="2600"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Buy Date</label>
+          <label className={labelClass}>Price As On</label>
           <input
             className={inputClass}
             type="date"
-            value={buyDate}
-            onChange={(e) => setBuyDate(e.target.value)}
+            value={priceAsOnDate}
+            onChange={(e) => setPriceAsOnDate(e.target.value)}
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Sector</label>
+          <label className={labelClass}>Initial Date</label>
           <input
             className={inputClass}
-            value={sector}
-            onChange={(e) => setSector(e.target.value)}
-            placeholder="Energy, IT, Banking"
+            type="date"
+            value={initialDate}
+            onChange={(e) => setInitialDate(e.target.value)}
           />
         </div>
         <div className="flex flex-col">

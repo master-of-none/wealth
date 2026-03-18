@@ -28,10 +28,13 @@ function nextAnniversary(openingDate: string): string {
 }
 
 const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+const cellInputClass = "w-full bg-transparent border-b border-[rgba(212,175,55,0.3)] text-[#e8e6e1] text-[13px] outline-none px-0 py-0.5 focus:border-[#d4af37]"
 
 export default function InsuranceLIC({ insuranceLIC, onUpdate }: InsuranceLICProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<InsuranceLICType | undefined>(undefined)
+  const [editMode, setEditMode] = useState(false)
+  const [editedRows, setEditedRows] = useState<InsuranceLICType[]>([])
 
   function openAdd() {
     setEditing(undefined)
@@ -58,8 +61,33 @@ export default function InsuranceLIC({ insuranceLIC, onUpdate }: InsuranceLICPro
     }
   }
 
+  function startEditMode() {
+    setEditedRows(insuranceLIC.map((i) => ({ ...i })))
+    setEditMode(true)
+  }
+
+  function cancelEditMode() {
+    setEditMode(false)
+    setEditedRows([])
+  }
+
+  function saveEditMode() {
+    onUpdate(editedRows)
+    setEditMode(false)
+    setEditedRows([])
+  }
+
+  function updateCell(id: string, field: keyof InsuranceLICType, value: string) {
+    const numFields = ['premium', 'fundValue']
+    setEditedRows((rows) =>
+      rows.map((r) => (r.id === id ? { ...r, [field]: numFields.includes(field) ? Number(value) : value } : r))
+    )
+  }
+
   const thClass = "px-3.5 py-2.5 text-[11px] font-semibold text-[#6b7a91] uppercase tracking-[0.8px] text-left border-b border-white/5"
   const tdClass = "px-3.5 py-3 text-[13px] bg-white/[0.02] border-t border-white/[0.03]"
+
+  const rows = editMode ? editedRows : insuranceLIC
 
   return (
     <>
@@ -68,15 +96,48 @@ export default function InsuranceLIC({ insuranceLIC, onUpdate }: InsuranceLICPro
           <h2 className="text-xl font-serif text-[#d4af37]">Insurance — LIC</h2>
           <p className="text-xs text-[#6b7a91] mt-1">Track LIC policies, premiums, and fund values</p>
         </div>
-        <button
-          className="px-5 py-2.5 rounded-lg border-none cursor-pointer text-[13px] font-semibold text-[#0a0e17] bg-gradient-to-br from-[#d4af37] to-[#c5a028] hover:brightness-110 inline-flex items-center gap-1.5 transition-all duration-200"
-          onClick={openAdd}
-        >
-          + Add Policy
-        </button>
+        <div className="flex gap-2">
+          {editMode ? (
+            <>
+              <button
+                className="px-5 py-2.5 rounded-lg border border-[rgba(212,175,55,0.3)] text-[#d4af37] bg-transparent hover:bg-[rgba(212,175,55,0.08)] cursor-pointer text-[13px] font-semibold transition-all duration-200"
+                onClick={cancelEditMode}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-5 py-2.5 rounded-lg border-none cursor-pointer text-[13px] font-semibold text-[#0a0e17] bg-gradient-to-br from-[#d4af37] to-[#c5a028] hover:brightness-110 transition-all duration-200"
+                onClick={saveEditMode}
+              >
+                ✓ Save All
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="px-5 py-2.5 rounded-lg border border-[rgba(212,175,55,0.3)] text-[#d4af37] bg-transparent hover:bg-[rgba(212,175,55,0.08)] cursor-pointer text-[13px] font-semibold transition-all duration-200"
+                onClick={startEditMode}
+              >
+                EDIT
+              </button>
+              <button
+                className="px-5 py-2.5 rounded-lg border-none cursor-pointer text-[13px] font-semibold text-[#0a0e17] bg-gradient-to-br from-[#d4af37] to-[#c5a028] hover:brightness-110 inline-flex items-center gap-1.5 transition-all duration-200"
+                onClick={openAdd}
+              >
+                + Add Policy
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      {insuranceLIC.length === 0 ? (
+      {editMode && (
+        <div className="mb-3 px-4 py-2.5 rounded-lg bg-[rgba(212,175,55,0.06)] border border-[rgba(212,175,55,0.2)] text-[12px] text-[#8a9bb5]">
+          Click any cell to edit. You can paste data directly from Excel. Press Save All when done.
+        </div>
+      )}
+
+      {rows.length === 0 ? (
         <div className="text-center py-12 px-5 text-[#6b7a91]">
           <div className="text-4xl mb-3 opacity-30">🛡️</div>
           <div className="font-semibold">No LIC policies yet</div>
@@ -93,9 +154,8 @@ export default function InsuranceLIC({ insuranceLIC, onUpdate }: InsuranceLICPro
                 <th className={thClass}>Opening Date</th>
                 <th className={thClass}>Closing Date</th>
                 <th className={thClass}>Premium/yr</th>
-                <th className={thClass}>Fund Value</th>
-                <th className={thClass}>A/C No</th>
-                <th className={thClass}>Premiums Paid Upto</th>
+                <th className={thClass}>Fund Value As On</th>
+                <th className={thClass}>Last Premium Due</th>
                 <th className={thClass}>Nominee</th>
                 <th className={thClass}>Next Premium</th>
                 <th className={thClass}>Status</th>
@@ -103,7 +163,7 @@ export default function InsuranceLIC({ insuranceLIC, onUpdate }: InsuranceLICPro
               </tr>
             </thead>
             <tbody>
-              {insuranceLIC.map((ins, idx) => {
+              {rows.map((ins, idx) => {
                 const d = daysUntil(ins.closingDate)
                 const status = d <= 0 ? 'Matured' : 'Active'
                 const badgeClass = d <= 0
@@ -119,15 +179,54 @@ export default function InsuranceLIC({ insuranceLIC, onUpdate }: InsuranceLICPro
                 return (
                   <tr key={ins.id}>
                     <td className={`${tdClass} text-[#6b7a91]`}>{idx + 1}</td>
-                    <td className={`${tdClass} font-semibold`}>{ins.holderName}</td>
-                    <td className={tdClass}>{ins.policyNo}</td>
-                    <td className={tdClass}>{fmtDate(ins.openingDate)}</td>
-                    <td className={tdClass}>{fmtDate(ins.closingDate)}</td>
-                    <td className={`${tdClass} font-semibold`}>{fmt(ins.premium)}</td>
-                    <td className={tdClass}>{ins.fundValue ? fmt(ins.fundValue) : '—'}</td>
-                    <td className={tdClass}>{ins.accountNo || '—'}</td>
-                    <td className={tdClass}>{fmtDate(ins.premiumsPaidUpto)}</td>
-                    <td className={tdClass}>{ins.nominee || '—'}</td>
+                    <td className={`${tdClass} font-semibold`}>
+                      {editMode ? (
+                        <input className={cellInputClass} value={ins.holderName} onChange={(e) => updateCell(ins.id, 'holderName', e.target.value)} />
+                      ) : ins.holderName}
+                    </td>
+                    <td className={tdClass}>
+                      {editMode ? (
+                        <input className={cellInputClass} value={ins.policyNo} onChange={(e) => updateCell(ins.id, 'policyNo', e.target.value)} />
+                      ) : ins.policyNo}
+                    </td>
+                    <td className={tdClass}>
+                      {editMode ? (
+                        <input className={cellInputClass} type="date" value={ins.openingDate} onChange={(e) => updateCell(ins.id, 'openingDate', e.target.value)} />
+                      ) : fmtDate(ins.openingDate)}
+                    </td>
+                    <td className={tdClass}>
+                      {editMode ? (
+                        <input className={cellInputClass} type="date" value={ins.closingDate} onChange={(e) => updateCell(ins.id, 'closingDate', e.target.value)} />
+                      ) : fmtDate(ins.closingDate)}
+                    </td>
+                    <td className={`${tdClass} font-semibold`}>
+                      {editMode ? (
+                        <input className={cellInputClass} type="number" value={ins.premium} onChange={(e) => updateCell(ins.id, 'premium', e.target.value)} />
+                      ) : fmt(ins.premium)}
+                    </td>
+                    <td className={tdClass}>
+                      {editMode ? (
+                        <>
+                          <input className={cellInputClass} type="number" value={ins.fundValue?.toString() || ''} onChange={(e) => updateCell(ins.id, 'fundValue', e.target.value)} placeholder="Fund value" />
+                          <input className={`${cellInputClass} mt-1`} type="date" value={ins.fundValueDate || ''} onChange={(e) => updateCell(ins.id, 'fundValueDate', e.target.value)} />
+                        </>
+                      ) : (
+                        <>
+                          <div>{ins.fundValue ? fmt(ins.fundValue) : '—'}</div>
+                          {ins.fundValueDate && <div className="text-[11px] text-[#8a9bb5] mt-0.5">{fmtDate(ins.fundValueDate)}</div>}
+                        </>
+                      )}
+                    </td>
+                    <td className={tdClass}>
+                      {editMode ? (
+                        <input className={cellInputClass} type="date" value={ins.lastPremiumDue || (ins as any).premiumsPaidUpto || ''} onChange={(e) => updateCell(ins.id, 'lastPremiumDue', e.target.value)} />
+                      ) : fmtDate(ins.lastPremiumDue || (ins as any).premiumsPaidUpto)}
+                    </td>
+                    <td className={tdClass}>
+                      {editMode ? (
+                        <input className={cellInputClass} value={ins.nominee || ''} onChange={(e) => updateCell(ins.id, 'nominee', e.target.value)} />
+                      ) : ins.nominee || '—'}
+                    </td>
                     <td className={tdClass}>
                       {nextPremium ? (
                         <span className={`text-[13px] font-semibold ${premiumBadgeClass}`}>
@@ -142,20 +241,22 @@ export default function InsuranceLIC({ insuranceLIC, onUpdate }: InsuranceLICPro
                       </span>
                     </td>
                     <td className={tdClass}>
-                      <div className="flex gap-1.5">
-                        <button
-                          className="px-2.5 py-1.5 text-xs rounded-lg border border-[rgba(212,175,55,0.3)] text-[#d4af37] bg-transparent hover:bg-[rgba(212,175,55,0.08)] cursor-pointer font-semibold inline-flex items-center gap-1.5 transition-all duration-200"
-                          onClick={() => openEdit(ins)}
-                        >
-                          ✎
-                        </button>
-                        <button
-                          className="px-2.5 py-1.5 text-xs rounded-lg cursor-pointer font-semibold text-red-500 bg-red-500/10 inline-flex items-center gap-1.5 transition-all duration-200"
-                          onClick={() => handleDelete(ins.id)}
-                        >
-                          ✕
-                        </button>
-                      </div>
+                      {!editMode && (
+                        <div className="flex gap-1.5">
+                          <button
+                            className="px-2.5 py-1.5 text-xs rounded-lg border border-[rgba(212,175,55,0.3)] text-[#d4af37] bg-transparent hover:bg-[rgba(212,175,55,0.08)] cursor-pointer font-semibold inline-flex items-center gap-1.5 transition-all duration-200"
+                            onClick={() => openEdit(ins)}
+                          >
+                            ✎
+                          </button>
+                          <button
+                            className="px-2.5 py-1.5 text-xs rounded-lg cursor-pointer font-semibold text-red-500 bg-red-500/10 inline-flex items-center gap-1.5 transition-all duration-200"
+                            onClick={() => handleDelete(ins.id)}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )

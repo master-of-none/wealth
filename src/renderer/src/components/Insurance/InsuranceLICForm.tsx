@@ -15,8 +15,7 @@ export default function InsuranceLICForm({ initial, onSave, onCancel }: Insuranc
   const [premium, setPremium] = useState(initial?.premium?.toString() || '')
   const [fundValue, setFundValue] = useState(initial?.fundValue?.toString() || '')
   const [fundValueDate, setFundValueDate] = useState(initial?.fundValueDate || '')
-  const [accountNo, setAccountNo] = useState(initial?.accountNo || '')
-  const [premiumsPaidUpto, setPremiumsPaidUpto] = useState(initial?.premiumsPaidUpto || '')
+  const [lastPremiumDue, setLastPremiumDue] = useState(initial?.lastPremiumDue || (initial as any)?.premiumsPaidUpto || '')
   const [nominee, setNominee] = useState(initial?.nominee || '')
   const [notes, setNotes] = useState(initial?.notes || '')
 
@@ -30,8 +29,7 @@ export default function InsuranceLICForm({ initial, onSave, onCancel }: Insuranc
       premium: Number(premium),
       fundValue: fundValue ? Number(fundValue) : undefined,
       fundValueDate: fundValueDate || undefined,
-      accountNo: accountNo || undefined,
-      premiumsPaidUpto: premiumsPaidUpto || undefined,
+      lastPremiumDue: lastPremiumDue || undefined,
       nominee: nominee || undefined,
       notes: notes || undefined,
     })
@@ -86,7 +84,7 @@ export default function InsuranceLICForm({ initial, onSave, onCancel }: Insuranc
             type="number"
             value={premium}
             onChange={(e) => setPremium(e.target.value)}
-            placeholder="25000"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
@@ -100,7 +98,7 @@ export default function InsuranceLICForm({ initial, onSave, onCancel }: Insuranc
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Fund Value Date</label>
+          <label className={labelClass}>Fund Value As On</label>
           <input
             className={inputClass}
             type="date"
@@ -109,21 +107,12 @@ export default function InsuranceLICForm({ initial, onSave, onCancel }: Insuranc
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Account No</label>
-          <input
-            className={inputClass}
-            value={accountNo}
-            onChange={(e) => setAccountNo(e.target.value)}
-            placeholder="Account number"
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className={labelClass}>Premiums Paid Upto</label>
+          <label className={labelClass}>Last Premium Due</label>
           <input
             className={inputClass}
             type="date"
-            value={premiumsPaidUpto}
-            onChange={(e) => setPremiumsPaidUpto(e.target.value)}
+            value={lastPremiumDue}
+            onChange={(e) => setLastPremiumDue(e.target.value)}
           />
         </div>
         <div className="flex flex-col">

@@ -7,30 +7,34 @@ interface MFFormProps {
   onCancel: () => void
 }
 
-const CATEGORIES = ['Equity', 'Debt', 'Hybrid', 'Index', 'ELSS', 'Liquid']
+const PERIODIC_OPTIONS = ['Monthly', 'Quarterly', 'Half-Yearly', 'Yearly']
 
 export default function MFForm({ initial, onSave, onCancel }: MFFormProps) {
   const [fundName, setFundName] = useState(initial?.fundName || '')
   const [folioNumber, setFolioNumber] = useState(initial?.folioNumber || '')
-  const [category, setCategory] = useState(initial?.category || 'Equity')
   const [sipAmount, setSipAmount] = useState(initial?.sipAmount?.toString() || '')
-  const [sipDay, setSipDay] = useState(initial?.sipDay?.toString() || '')
+  const [periodic, setPeriodic] = useState(initial?.periodic || 'Monthly')
+  const [initialInvestmentDate, setInitialInvestmentDate] = useState(initial?.initialInvestmentDate || '')
   const [totalInvested, setTotalInvested] = useState(initial?.totalInvested?.toString() || '')
-  const [currentValue, setCurrentValue] = useState(initial?.currentValue?.toString() || '')
+  const [nav, setNav] = useState(initial?.nav?.toString() || '')
+  const [navDate, setNavDate] = useState(initial?.navDate || '')
   const [units, setUnits] = useState(initial?.units?.toString() || '')
   const [notes, setNotes] = useState(initial?.notes || '')
 
   function handleSubmit() {
     if (!fundName || !sipAmount) return
+    const navNum = Number(nav)
+    const unitsNum = units ? Number(units) : undefined
     onSave({
       fundName,
       folioNumber,
-      category,
       sipAmount: Number(sipAmount),
-      sipDay: sipDay ? Number(sipDay) : undefined,
+      periodic,
+      initialInvestmentDate: initialInvestmentDate || undefined,
       totalInvested: Number(totalInvested),
-      currentValue: Number(currentValue),
-      units: units ? Number(units) : undefined,
+      nav: navNum,
+      navDate: navDate || undefined,
+      units: unitsNum,
       notes,
     })
   }
@@ -61,16 +65,13 @@ export default function MFForm({ initial, onSave, onCancel }: MFFormProps) {
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>Category</label>
-          <select
-            className={selectClass}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
+          <label className={labelClass}>Date of Initial Investment</label>
+          <input
+            className={inputClass}
+            type="date"
+            value={initialInvestmentDate}
+            onChange={(e) => setInitialInvestmentDate(e.target.value)}
+          />
         </div>
         <div className="flex flex-col">
           <label className={labelClass}>SIP Amount (₹)</label>
@@ -79,20 +80,20 @@ export default function MFForm({ initial, onSave, onCancel }: MFFormProps) {
             type="number"
             value={sipAmount}
             onChange={(e) => setSipAmount(e.target.value)}
-            placeholder="5000"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
-          <label className={labelClass}>SIP Day (1-28)</label>
-          <input
-            className={inputClass}
-            type="number"
-            min="1"
-            max="28"
-            value={sipDay}
-            onChange={(e) => setSipDay(e.target.value)}
-            placeholder="5"
-          />
+          <label className={labelClass}>Periodic</label>
+          <select
+            className={selectClass}
+            value={periodic}
+            onChange={(e) => setPeriodic(e.target.value)}
+          >
+            {PERIODIC_OPTIONS.map((p) => (
+              <option key={p}>{p}</option>
+            ))}
+          </select>
         </div>
         <div className="flex flex-col">
           <label className={labelClass}>Total Invested (₹)</label>
@@ -101,17 +102,7 @@ export default function MFForm({ initial, onSave, onCancel }: MFFormProps) {
             type="number"
             value={totalInvested}
             onChange={(e) => setTotalInvested(e.target.value)}
-            placeholder="60000"
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className={labelClass}>Current Value (₹)</label>
-          <input
-            className={inputClass}
-            type="number"
-            value={currentValue}
-            onChange={(e) => setCurrentValue(e.target.value)}
-            placeholder="65000"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
@@ -122,10 +113,30 @@ export default function MFForm({ initial, onSave, onCancel }: MFFormProps) {
             step="0.001"
             value={units}
             onChange={(e) => setUnits(e.target.value)}
-            placeholder="150.25"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
+          <label className={labelClass}>NAV (₹)</label>
+          <input
+            className={inputClass}
+            type="number"
+            step="0.01"
+            value={nav}
+            onChange={(e) => setNav(e.target.value)}
+            placeholder="0"
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className={labelClass}>NAV As On</label>
+          <input
+            className={inputClass}
+            type="date"
+            value={navDate}
+            onChange={(e) => setNavDate(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col col-span-2">
           <label className={labelClass}>Notes</label>
           <input
             className={inputClass}
