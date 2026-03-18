@@ -66,7 +66,7 @@ export default function FDForm({ initial, onSave, onCancel }: FDFormProps) {
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="100000"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
@@ -77,7 +77,7 @@ export default function FDForm({ initial, onSave, onCancel }: FDFormProps) {
             step="0.01"
             value={interestRate}
             onChange={(e) => setInterestRate(e.target.value)}
-            placeholder="7.5"
+            placeholder="0000"
           />
         </div>
         <div className="flex flex-col">
