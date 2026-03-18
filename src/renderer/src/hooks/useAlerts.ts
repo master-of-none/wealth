@@ -97,19 +97,6 @@ export function useAlerts(
       }
     })
 
-    mutualFunds.forEach((mf) => {
-      if (!mf.sipDay) return
-      const d = daysToSIP(Number(mf.sipDay))
-      if (d <= 3) {
-        alerts.push({
-          id: `mf-s-${mf.id}`,
-          urgency: d <= 1 ? 'critical' : 'warning',
-          title: `${mf.fundName} SIP ${d === 0 ? 'today' : `in ${d}d`}`,
-          detail: `SIP of ${fmt(mf.sipAmount)} on the ${ordinal(Number(mf.sipDay))}`,
-          days: d,
-        })
-      }
-    })
 
     postalAccounts.forEach((pa) => {
       const d = daysUntil(pa.closingDate)
